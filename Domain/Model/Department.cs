@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 #nullable disable
 
-namespace BankEF.Model
+namespace Domain.Model
 {
     public partial class Department : Named
     {
@@ -14,9 +13,10 @@ namespace BankEF.Model
             {
                 clients = value ?? new HashSet<Client>(); foreach (Client client in clients)
                 {
-                    client.DepartmentId = Id;
+                    client.Department = this;
                 }
             }
         }
+        public override string ToString() => "Department " + Name;
     }
 }

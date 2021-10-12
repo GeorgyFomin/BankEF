@@ -1,14 +1,10 @@
-﻿using BankEF.Model;
+using Domain.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BankEF
+namespace Persistence
 {
-    class DataContext : DbContext
+    public class DataContext : DbContext
     {
         public DbSet<Department> Departments { get; set; }
         public DbSet<Client> Clients { get; set; }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace BankEF.Model
+namespace Domain.Model
 {
     public partial class Client : Named
     {
-        public Guid DepartmentId { get; set; }
+        public Department Department { get; set; }
         private ICollection<Deposit> deposits = new HashSet<Deposit>();
         public virtual ICollection<Deposit> Deposits
         {
@@ -15,7 +15,7 @@ namespace BankEF.Model
             {
                 deposits = value ?? new HashSet<Deposit>(); foreach (Deposit deposit in deposits)
                 {
-                    deposit.ClientId = Id;
+                    deposit.Client = this;
                 }
             }
         }
@@ -26,9 +26,10 @@ namespace BankEF.Model
             {
                 loans = value ?? new HashSet<Loan>(); foreach (Loan loan in loans)
                 {
-                    loan.ClientId = Id;
+                    loan.Client = this;
                 }
             }
         }
+        public override string ToString() => Department.ToString() + ";Client " + Name;
     }
 }
