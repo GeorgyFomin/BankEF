@@ -1,4 +1,5 @@
 ﻿using Domain.Model;
+using Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,30 +22,30 @@ namespace BankEF
     /// </summary>
     public partial class MainWindow : Window
     {
-        //DataContext context = new DataContext();
-        //void ClearTables()
-        //{
-        //    foreach (Deposit deposit in context.Deposits)
-        //    {
-        //        context.Deposits.Remove(deposit);
-        //    }
-        //    foreach (Loan loan in context.Loans)
-        //    {
-        //        context.Loans.Remove(loan);
-        //    }
-        //    foreach (Client client in context.Clients)
-        //    {
-        //        context.Clients.Remove(client);
-        //    }
-        //    foreach (Department department in context.Departments)
-        //    {
-        //        context.Departments.Remove(department);
-        //    }
-        //}
+        DataContext context = new DataContext();
+        void ClearTables()
+        {
+            foreach (Deposit deposit in context.Deposits)
+            {
+                context.Deposits.Remove(deposit);
+            }
+            foreach (Loan loan in context.Loans)
+            {
+                context.Loans.Remove(loan);
+            }
+            foreach (Client client in context.Clients)
+            {
+                context.Clients.Remove(client);
+            }
+            foreach (Department department in context.Departments)
+            {
+                context.Departments.Remove(department);
+            }
+        }
         public MainWindow()
         {
             InitializeComponent();
-            //ClearTables();
+            ClearTables();
         }
     }
 }
