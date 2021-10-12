@@ -1,19 +1,6 @@
 ﻿using Domain.Model;
 using Persistence;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace BankEF
 {
@@ -22,7 +9,7 @@ namespace BankEF
     /// </summary>
     public partial class MainWindow : Window
     {
-        DataContext context = new DataContext();
+        readonly DataContext context = new();
         void ClearTables()
         {
             foreach (Deposit deposit in context.Deposits)
@@ -42,10 +29,26 @@ namespace BankEF
                 context.Departments.Remove(department);
             }
         }
+        void FillTables()
+        {
+            context.Departments.AddRange(ClassLibrary.RandomBank.Deps);
+            foreach (Department dep in context.Departments)
+            {
+                context.Clients.AddRange(dep.Clients);
+                foreach (Client client in context.Clients)
+                {
+                    context.Deposits.AddRange(client.Deposits);
+                    context.Loans.AddRange(client.Loans);
+                }
+            }
+            context.SaveChanges();
+
+        }
         public MainWindow()
         {
             InitializeComponent();
             ClearTables();
+            FillTables();
         }
     }
 }
