@@ -4,7 +4,7 @@ using Persistence;
 using System;
 using System.IO;
 
-namespace Applic.ViewModels
+namespace Application.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {

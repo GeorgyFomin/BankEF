@@ -1,6 +1,6 @@
 using System;
 
-namespace Applic
+namespace Application
 {
     public class Applic
     {
