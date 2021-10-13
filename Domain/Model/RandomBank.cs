@@ -1,12 +1,8 @@
-﻿using Domain.Model;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ClassLibrary
+namespace Domain.Model
 {
     public static class RandomBank
     {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Applic.ViewModels;
 using System.Windows;
 
 namespace BankEF
@@ -13,5 +8,12 @@ namespace BankEF
     /// </summary>
     public partial class App : Application
     {
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            MainViewModel mainViewModel = new();
+            MainWindow mainWindow = new() { DataContext = mainViewModel };
+            mainWindow.Show();
+            base.OnStartup(e);
+        }
     }
 }
