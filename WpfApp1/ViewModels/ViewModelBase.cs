@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace BankEF
+namespace BankEF.ViewModels
 {
     public class ViewModelBase : INotifyPropertyChanged
     {

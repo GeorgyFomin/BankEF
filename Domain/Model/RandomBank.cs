@@ -9,21 +9,22 @@ namespace Domain.Model
         /// <summary>
         /// Хранит максимально возможную сумму вклада.
         /// </summary>
-        const double MaxSize = 1_000_000_000;
+        private const double MaxSize = 1_000_000_000;
+
         /// <summary>
         /// Хранит максимально возможную доходность вклада в процентах.
         /// </summary>
-        const double MaxRate = 10;
+        private const double MaxRate = 10;
         /// <summary>
         /// Хранит ссылку на генератор случайных чисел.
         /// </summary>
-        static public readonly Random random = new Random();
+        static public readonly Random random = new();
         /// <summary>
         /// Возвращает случайный банк.
         /// </summary>
         /// <returns></returns>
         //static public Bank GetBank() => new Bank(GetRandomString(4, random), GetRandomDeps(random.Next(1, 5), random));
-        static public ObservableCollection<Department> Deps = GetRandomDeps(random.Next(1, 5), random);
+        public static ObservableCollection<Department> Deps = GetRandomDeps(random.Next(1, 5), random);
         /// <summary>
         /// Возвращает список случайных отделов.
         /// </summary>

@@ -1,4 +1,4 @@
-﻿using Application.ViewModels;
+﻿using BankEF.ViewModels;
 using System.Windows;
 
 namespace BankEF
@@ -6,12 +6,12 @@ namespace BankEF
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : System.Windows.Application
+    public partial class App : Application
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            MainViewModel mainViewModel = new();
-            MainWindow mainWindow = new() { DataContext = mainViewModel };
+            MainViewModel mainViewModel = new MainViewModel();
+            MainWindow mainWindow = new MainWindow() { DataContext = mainViewModel };
             mainWindow.Show();
             base.OnStartup(e);
         }
