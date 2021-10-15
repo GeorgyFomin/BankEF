@@ -113,7 +113,7 @@ namespace BankEF.ViewModels
                     if (MessageBox.Show($"Вы действительно хотите перевести со счета №{depo.Number} на счет №{targetTransferDepo.Number} сумму {TransferAmount}?",
                         "Перевод между счетами", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                         return;
-                    depo.Size -= TransferAmount;
+                    Depo.Size -= TransferAmount;
                     TargetTransferDepo.Size += TransferAmount;
                     MainViewModel.Log($"Со счета {depo} будет переведено {TransferAmount} на счет {targetTransferDepo}");
                     string comment = $"Со счета {depo} переведено {TransferAmount} на счет {targetTransferDepo}";
@@ -131,9 +131,11 @@ namespace BankEF.ViewModels
             // Блокируем появление в списке депозитов, на которые могут быть переведены средства, депозит, с которого средства списываются.
             targetTransferListEnabled = true;
             TryToTransfer();
-            targetTransferListEnabled = false;
             // Снимаем блокировку со списка доступных депозитов.
+            targetTransferListEnabled = false;
             RaisePropertyChanged(nameof(Deposits));
+            MainViewModel.context.SaveChanges();
+            (e as DataGrid).Items.Refresh();
         }
         private void SelectTargetTransferDepo(object e)
         {
