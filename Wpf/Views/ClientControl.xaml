@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:local="clr-namespace:BankEF" 
+             xmlns:local="clr-namespace:BankEF.ViewModels" 
              xmlns:viewmodels="clr-namespace:BankEF.ViewModels" 
                 d:DataContext="{d:DesignInstance Type=viewmodels:ClientViewModel}"
              mc:Ignorable="d"
@@ -17,8 +17,14 @@
         <TextBlock HorizontalAlignment="Stretch" Text="Clients" VerticalAlignment="Center" Foreground="{StaticResource textColor}" 
                    Background="{StaticResource mainBckgr}" FontSize="24"/>
         <DataGrid RowHeaderStyle="{StaticResource BlackNavy}" x:Name="clientsGrid" Grid.Row="1" ItemsSource="{Binding DataSource}" 
-                  AutoGenerateColumns="False" Style="{StaticResource ResourceKey=BlackNavy}" RowStyle="{StaticResource RowStyle}" 
-                  CellStyle="{StaticResource CellStyle}">
+                  AutoGenerateColumns="False" Style="{StaticResource ResourceKey=BlackNavy}" 
+                  CellStyle="{StaticResource CellStyle}" RowStyle="{StaticResource RowStyle}">
+            <!--RowStyle="{StaticResource RowStyle}" -->
+            <!--<DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource RowStyle}">
+                    <Setter Property="local:MyBehavior.Command" Value="{Binding DataContext.BeamGridRmbCommand,RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                </Style>
+            </DataGrid.RowStyle>-->
             <DataGrid.ColumnHeaderStyle>
                 <Style BasedOn="{StaticResource ResourceKey=BlackNavy}"/>
             </DataGrid.ColumnHeaderStyle>
@@ -29,15 +35,15 @@
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=clientsGrid}"/>
                 </i:EventTrigger>
-                <i:EventTrigger EventName="MouseRightButtonDown">
+                <i:EventTrigger EventName="MouseRightButtonUp">
                     <i:InvokeCommandAction Command="{Binding RemoveClientCommand}" CommandParameter="{Binding ElementName=clientsGrid}"/>
                 </i:EventTrigger>
-                <i:EventTrigger EventName="CellEditEnding">
+                <!--<i:EventTrigger EventName="CellEditEnding">
                     <i:InvokeCommandAction Command="{Binding CellEditEndingCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CurrentCellChanged">
                     <i:InvokeCommandAction Command="{Binding CellChangedCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
-                </i:EventTrigger>
+                </i:EventTrigger>-->
             </i:Interaction.Triggers>
         </DataGrid>
     </Grid>

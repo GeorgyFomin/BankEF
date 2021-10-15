@@ -17,7 +17,7 @@ namespace BankEF.ViewModels
             tw.WriteLine($"{DateTime.Now}:{report}");
         }
         #region Fields
-        public static readonly DataContext context = new();
+        private readonly DataContext context = new();
         private ViewModelBase viewModel;
         private RelayCommand dragCommand;
         private RelayCommand minimizeCommand;
@@ -41,9 +41,21 @@ namespace BankEF.ViewModels
         });
         public ICommand CloseCommand => closeCommand ??= new RelayCommand((e) => (e as MainWindow).Close());
         public ICommand ListCommand => listCommand ??= new RelayCommand((e) => ViewModel = new ListViewModel());
-        public ICommand ClientsCommand => clientsCommand ??= new RelayCommand((e) => ViewModel = new ClientViewModel() { DataSource = context.Clients.Local.ToBindingList() });
-        public ICommand DepositsCommand => depositsCommand ??= new RelayCommand((e) => ViewModel = new DepositViewModel() { DataSource = context.Deposits.Local.ToBindingList() });
-        public ICommand LoansCommand => loansCommand ??= new RelayCommand((e) => ViewModel = new LoanViewModel() { DataSource = context.Loans.Local.ToBindingList() });
+        public ICommand ClientsCommand => clientsCommand ??= new RelayCommand((e) => ViewModel = new ClientViewModel()
+        {
+            DataContext = context,
+            DataSource = context.Clients.Local.ToBindingList()
+        });
+        public ICommand DepositsCommand => depositsCommand ??= new RelayCommand((e) => ViewModel = new DepositViewModel()
+        {
+            DataContext = context,
+            DataSource = context.Deposits.Local.ToBindingList()
+        });
+        public ICommand LoansCommand => loansCommand ??= new RelayCommand((e) => ViewModel = new LoanViewModel()
+        {
+            DataContext = context,
+            DataSource = context.Loans.Local.ToBindingList()
+        });
         public ICommand ResetBankCommand => resetBankCommand ??= new RelayCommand((e) => ResetBank());
         #endregion
         private void ClearTables()

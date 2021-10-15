@@ -5,6 +5,7 @@ using Domain.Model;
 using BankEF.Commands;
 using BankEF.Dialogs;
 using System.Collections.ObjectModel;
+using Persistence.Context;
 
 namespace BankEF.ViewModels
 {
@@ -15,6 +16,7 @@ namespace BankEF.ViewModels
         /// Хранит ссылку на текущий депозит.
         /// </summary>
         private Deposit depo;
+        private DataContext dataContext;
         /// <summary>
         /// Хранит ссылку на текущий источник данных таблицы депозитов.
         /// </summary>
@@ -63,7 +65,7 @@ namespace BankEF.ViewModels
             get
             {
                 ObservableCollection<Deposit> deposits = new();
-                foreach (Department dep in MainViewModel.context.Departments)
+                foreach (Department dep in dataContext.Departments)
                     foreach (Client client in dep.Clients)
                         foreach (Deposit deposit in client.Deposits)
                         {
@@ -75,6 +77,7 @@ namespace BankEF.ViewModels
                 return deposits;
             }
         }
+        public DataContext DataContext { get => dataContext; set { dataContext = value; RaisePropertyChanged(nameof(DataContext)); } }
         /// <summary>
         /// Устанавливает и возвращает ссылку на текущий источник данных в таблице. 
         /// </summary>
@@ -101,8 +104,8 @@ namespace BankEF.ViewModels
         {
             if (depo == null || MessageBox.Show($"Удалить депозит {depo}?", $"Удаление депозита {depo}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
-            MainViewModel.context.Deposits.Remove(depo);
-            MainViewModel.context.SaveChanges();
+            dataContext.Deposits.Remove(depo);
+            dataContext.SaveChanges();
         }
         private void Transfer(object e)
         {
@@ -134,7 +137,7 @@ namespace BankEF.ViewModels
             // Снимаем блокировку со списка доступных депозитов.
             targetTransferListEnabled = false;
             RaisePropertyChanged(nameof(Deposits));
-            MainViewModel.context.SaveChanges();
+            dataContext.SaveChanges();
             (e as DataGrid).Items.Refresh();
         }
         private void SelectTargetTransferDepo(object e)
