@@ -11,12 +11,11 @@ namespace BankEF.ViewModels
     public class LoanViewModel : ViewModelBase
     {
         private RelayCommand removeLoanCommand;
-        private DataContext dataContext;
         /// <summary>
         /// Устанавливает и возвращает ссылку на текущий источник данных в таблице. 
         /// </summary>
         public object DataSource { get; set; }
-        public DataContext DataContext { get => dataContext; set { dataContext = value; RaisePropertyChanged(nameof(DataContext)); } }
+        public DataContext Context { get; set; }
         public ICommand RemoveLoanCommand => removeLoanCommand ??= new RelayCommand(RemoveLoan);
         private void RemoveLoan(object e)
         {
@@ -26,8 +25,8 @@ namespace BankEF.ViewModels
             {
                 return;
             }
-            dataContext.Loans.Remove(loan);
-            dataContext.SaveChanges();
+            Context.Loans.Remove(loan);
+            Context.SaveChanges();
         }
     }
 }

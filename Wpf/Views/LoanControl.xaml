@@ -27,18 +27,18 @@
                 <Style BasedOn="{StaticResource ResourceKey=BlackNavy}"/>
             </DataGrid.ColumnHeaderStyle>
             <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
-                </i:EventTrigger>
                 <i:EventTrigger EventName="MouseRightButtonDown">
                     <i:InvokeCommandAction Command="{Binding RemoveLoanCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
+                </i:EventTrigger>
+                <!--<i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CellEditEnding">
                     <i:InvokeCommandAction Command="{Binding LoanEditEndingCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CurrentCellChanged">
                     <i:InvokeCommandAction Command="{Binding CellChangedCommand}" CommandParameter="{Binding ElementName=loanGrid}" />
-                </i:EventTrigger>
+                </i:EventTrigger>-->
             </i:Interaction.Triggers>
         </DataGrid>
     </Grid>

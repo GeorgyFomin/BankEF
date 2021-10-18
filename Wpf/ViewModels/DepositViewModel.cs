@@ -16,11 +16,6 @@ namespace BankEF.ViewModels
         /// Хранит ссылку на текущий депозит.
         /// </summary>
         private Deposit depo;
-        private DataContext dataContext;
-        /// <summary>
-        /// Хранит ссылку на текущий источник данных таблицы депозитов.
-        /// </summary>
-        private object dataSource;
         /// <summary>
         /// Хранит флаг, определяющий состояние выборки депозита, из которого будут переведены средства.
         /// </summary>
@@ -65,7 +60,7 @@ namespace BankEF.ViewModels
             get
             {
                 ObservableCollection<Deposit> deposits = new();
-                foreach (Department dep in dataContext.Departments)
+                foreach (Department dep in Context.Departments)
                     foreach (Client client in dep.Clients)
                         foreach (Deposit deposit in client.Deposits)
                         {
@@ -77,11 +72,11 @@ namespace BankEF.ViewModels
                 return deposits;
             }
         }
-        public DataContext DataContext { get => dataContext; set { dataContext = value; RaisePropertyChanged(nameof(DataContext)); } }
+        public DataContext Context { get; set; }
         /// <summary>
         /// Устанавливает и возвращает ссылку на текущий источник данных в таблице. 
         /// </summary>
-        public object DataSource { get => dataSource; set { dataSource = value; RaisePropertyChanged(nameof(DataSource)); } }
+        public object DataSource { get; set; }
         #region Transfer properties
         public bool SourceTransferDepoSelected { get => sourceTransferDepoSelected; set { sourceTransferDepoSelected = value; RaisePropertyChanged(nameof(SourceTransferDepoSelected)); } }
         public Account TargetTransferDepo { get => targetTransferDepo; set { targetTransferDepo = value; RaisePropertyChanged(nameof(TargetTransferDepo)); } }
@@ -104,8 +99,8 @@ namespace BankEF.ViewModels
         {
             if (depo == null || MessageBox.Show($"Удалить депозит {depo}?", $"Удаление депозита {depo}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
-            dataContext.Deposits.Remove(depo);
-            dataContext.SaveChanges();
+            Context.Deposits.Remove(depo);
+            Context.SaveChanges();
         }
         private void Transfer(object e)
         {
@@ -137,7 +132,7 @@ namespace BankEF.ViewModels
             // Снимаем блокировку со списка доступных депозитов.
             targetTransferListEnabled = false;
             RaisePropertyChanged(nameof(Deposits));
-            dataContext.SaveChanges();
+            Context.SaveChanges();
             (e as DataGrid).Items.Refresh();
         }
         private void SelectTargetTransferDepo(object e)

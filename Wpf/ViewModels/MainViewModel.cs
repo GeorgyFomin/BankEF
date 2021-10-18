@@ -43,17 +43,17 @@ namespace BankEF.ViewModels
         public ICommand ListCommand => listCommand ??= new RelayCommand((e) => ViewModel = new ListViewModel());
         public ICommand ClientsCommand => clientsCommand ??= new RelayCommand((e) => ViewModel = new ClientViewModel()
         {
-            DataContext = context,
+            Context = context,
             DataSource = context.Clients.Local.ToBindingList()
         });
         public ICommand DepositsCommand => depositsCommand ??= new RelayCommand((e) => ViewModel = new DepositViewModel()
         {
-            DataContext = context,
+            Context = context,
             DataSource = context.Deposits.Local.ToBindingList()
         });
         public ICommand LoansCommand => loansCommand ??= new RelayCommand((e) => ViewModel = new LoanViewModel()
         {
-            DataContext = context,
+            Context = context,
             DataSource = context.Loans.Local.ToBindingList()
         });
         public ICommand ResetBankCommand => resetBankCommand ??= new RelayCommand((e) => ResetBank());
