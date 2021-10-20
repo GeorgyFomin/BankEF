@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows;
 using Domain.Model;
@@ -12,6 +14,10 @@ namespace BankEF.ViewModels
     public class DepositViewModel : ViewModelBase
     {
         #region Fields
+        /// <summary>
+        /// Хранит ссылку на клиента, которому открыт новый депозит.
+        /// </summary>
+        private Client client;
         /// <summary>
         /// Хранит ссылку на текущий депозит.
         /// </summary>
@@ -40,14 +46,19 @@ namespace BankEF.ViewModels
         /// Хранит флаг активации списка депозитов, на который могут быть переведены средства.
         /// </summary>
         private bool targetTransferListEnabled;
+        private bool clientDoSelected;
         private RelayCommand selectionChangedCommand;
+        private RelayCommand depoEditEndingCommand;
         private RelayCommand removeDepoCommand;
+        private RelayCommand clientSelectedCommand;
+        private RelayCommand oKClientSelectionCommand;
         private RelayCommand transferCommand;
         private RelayCommand targetTransferDepoSelectionChangedCommand;
         private RelayCommand oKTransferCommand;
         private RelayCommand transfAmountChangedCommand;
         #endregion
         #region Properties
+        public bool ClientDoSelected { get => clientDoSelected; set { clientDoSelected = value; RaisePropertyChanged(nameof(ClientDoSelected)); } }
         /// <summary>
         /// Устанавливает и возвращает ссылку на текущий депозит.
         /// </summary>
@@ -77,6 +88,18 @@ namespace BankEF.ViewModels
         /// Устанавливает и возвращает ссылку на текущий источник данных в таблице. 
         /// </summary>
         public object DataSource { get; set; }
+        /// <summary>
+        /// Возвращает и устанавливает клиента, которому приписываетя вновь открываемый депозит.
+        /// </summary>
+        public Client Client { get => client; set { client = value; RaisePropertyChanged(nameof(Client)); } }
+        /// <summary>
+        /// Возвращает список всех клиентов банка.
+        /// </summary>
+        public ObservableCollection<Client> Clients => Context.Clients.Local.ToObservableCollection();
+        #region Команды выбора клиента для вновь открываемого депозита.
+        public ICommand ClientSelectedCommand => clientSelectedCommand ?? (clientSelectedCommand = new RelayCommand((e) => ClientDoSelected = true));
+        public ICommand OKClientSelectionCommand => oKClientSelectionCommand ?? (oKClientSelectionCommand = new RelayCommand(SelectNewDepositClient));
+        #endregion
         #region Transfer properties
         public bool SourceTransferDepoSelected { get => sourceTransferDepoSelected; set { sourceTransferDepoSelected = value; RaisePropertyChanged(nameof(SourceTransferDepoSelected)); } }
         public Account TargetTransferDepo { get => targetTransferDepo; set { targetTransferDepo = value; RaisePropertyChanged(nameof(TargetTransferDepo)); } }
@@ -86,6 +109,7 @@ namespace BankEF.ViewModels
         #endregion
         public ICommand SelectionChangedCommand => selectionChangedCommand ??=
             new RelayCommand((e) => SourceTransferDepoSelected = (Depo = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null);
+        public ICommand DepoEditEndingCommand => depoEditEndingCommand ??= new RelayCommand(DepoEditEnding);
         public ICommand RemoveDepoCommand => removeDepoCommand ??= new RelayCommand(RemoveDepo);
         #region Команды перечисления средств с одного депозита на другой.
         public ICommand TransferCommand => transferCommand ??= new RelayCommand(Transfer);
@@ -94,13 +118,40 @@ namespace BankEF.ViewModels
         public ICommand TargetTransferDepoSelectionChangedCommand => targetTransferDepoSelectionChangedCommand ??= new RelayCommand(SelectTargetTransferDepo);
         #endregion
         #endregion
-        public DepositViewModel() { sourceTransferDepoSelected = transferEnabled = false; }
+        public DepositViewModel() {}
+        private void DepoEditEnding(object e)
+        {
+            void InsertDepoIntoClient()
+            {
+                depo.Client = client;
+                client.Deposits.Add(depo);
+                RaisePropertyChanged(nameof(Depo));
+            }
+            if (depo.Client == default)
+            {
+                bool flag;
+                do
+                {
+                    if (flag = (bool)new ClientsDialog { DataContext = this }.ShowDialog() && client != null)
+                        InsertDepoIntoClient();
+                } while (!flag);
+                MainViewModel.Log($"Клиенту {client} открыт депозит {depo}.");
+            }
+            else
+                MainViewModel.Log($"Поля депозита №{depo.Number} отредактированы.");
+        }
         private void RemoveDepo(object e)
         {
             if (depo == null || MessageBox.Show($"Удалить депозит {depo}?", $"Удаление депозита {depo}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
             Context.Deposits.Remove(depo);
             Context.SaveChanges();
+        }
+        private void SelectNewDepositClient(object e)
+        {
+            ClientsDialog dialog = e as ClientsDialog;
+            Client = dialog.clientListBox.SelectedItem is Client client ? client : null;
+            dialog.DialogResult = true;
         }
         private void Transfer(object e)
         {
@@ -158,5 +209,6 @@ namespace BankEF.ViewModels
                 return;
             }
         }
+
     }
 }

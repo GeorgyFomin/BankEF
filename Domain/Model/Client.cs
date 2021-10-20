@@ -30,6 +30,6 @@ namespace Domain.Model
                 }
             }
         }
-        public override string ToString() => Department.ToString() + ";Client " + Name;
+        public override string ToString() => (Department!=null? Department.ToString(): string.Empty) + ";Client " + Name;
     }
 }

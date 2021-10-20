@@ -1,6 +1,8 @@
 ﻿using BankEF.Commands;
+using BankEF.Dialogs;
 using Domain.Model;
 using Persistence.Context;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,21 +10,75 @@ namespace BankEF.ViewModels
 {
     public class ClientViewModel : ViewModelBase
     {
+        #region Fields
+        /// <summary>
+        /// Хранит индекс отдела по умолчанию, в который добавляется клиент.
+        /// </summary>
+        private const int DepClientAddToDefault = 0;
         private RelayCommand removeClientCommand;
+        private RelayCommand oKDepartmentCommand;
+        private RelayCommand depSelDefaultCommand;
+        private RelayCommand cellEditEndingCommand;
+        private RelayCommand selectionChangedCommand;
+        private Client client;
+        private Department dep;
+        #endregion
+        #region Properties
         public DataContext Context { get; set; }
         /// <summary>
         /// Устанавливает и возвращает ссылку на текущий источник данных в таблице. 
         /// </summary>
         public object DataSource { get; set; }
+        public Department Dep { get => dep; set { dep = value; RaisePropertyChanged(nameof(Dep)); } }
+        public ObservableCollection<Department> Deps { get => Context.Departments.Local.ToObservableCollection(); }
+        public ICommand SelectionChangedCommand => selectionChangedCommand ??= new RelayCommand(SelectionChanged);
         public ICommand RemoveClientCommand => removeClientCommand ??= new RelayCommand(RemoveClient);
+        public ICommand CellEditEndingCommand => cellEditEndingCommand ??= new RelayCommand(CellEditEnding);
+        public ICommand OKDepartmentCommand => oKDepartmentCommand ??= new RelayCommand((e) =>
+        {
+            DepsDialog dialog = e as DepsDialog;
+            Dep = dialog.depListBox.SelectedItem as Department;
+            dialog.DialogResult = true;
+        });
+        public ICommand DepSelDefaultCommand
+            => depSelDefaultCommand ??= new RelayCommand((e) => ((ListBox)e).SelectedItem = ((ListBox)e).Items[DepClientAddToDefault]);
+        #endregion
+        private void SelectionChanged(object e)
+        {
+            // Определяем выделенный элемент списка.
+            object selItem = (e as DataGrid).SelectedItem;
+            // Фильтруем ссылку.
+            if (selItem == null)
+                return;
+            // Запоминаем выделенного клиента.
+            client = selItem as Client;
+        }
         private void RemoveClient(object e)
         {
-            object item = (e as DataGrid).SelectedItem;
-            Client client= item == null ? null : (Client)item;
             if (client == null || MessageBox.Show($"Удалить клиента {client}?", $"Удаление клиента {client}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
+            MainViewModel.Log($"Удален клиент {client}.");
             Context.Clients.Remove(client);
             Context.SaveChanges();
+        }
+        private void CellEditEnding(object e)
+        {
+            if (client == null)
+                return;
+            if (client.Department == null)
+            {
+                // Выбор отдела, к которому относится клиент.
+                // Выбираем по умолчанию.
+                Dep = Context.Departments.Local.ToBindingList()[DepClientAddToDefault];
+                // Показываем список отделов в диалоговом рeжиме.
+                // Выбираем из списка.
+                _ = new DepsDialog { DataContext = this }.ShowDialog();
+                // Добавляем в отдел клиента.
+                Dep.Clients.Add(client);
+                MainViewModel.Log($"В отдел {dep} добавлен клиент {client}.");
+            }
+            else
+                MainViewModel.Log($"Отредактирован клиент {client}");
         }
     }
 }

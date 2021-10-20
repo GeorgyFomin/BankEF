@@ -12,6 +12,6 @@ namespace Domain.Model
         public double Rate { get; set; }
         public bool Cap { get; set; }
         public Account() => Number = GetHashCode();
-        public override string ToString() => Client.ToString() + ";Account №" + $"{Number};Size {Size:C2};Rate {Rate:g4};Cap {Cap}";
+        public override string ToString() => (Client != null ? Client.ToString() : string.Empty) + ";Account №" + $"{Number};Size {Size:C2};Rate {Rate:g4};Cap {Cap}";
     }
 }
