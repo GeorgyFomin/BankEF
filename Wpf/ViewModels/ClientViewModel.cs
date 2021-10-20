@@ -57,9 +57,13 @@ namespace BankEF.ViewModels
         {
             if (client == null || MessageBox.Show($"Удалить клиента {client}?", $"Удаление клиента {client}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
-            MainViewModel.Log($"Удален клиент {client}.");
+            foreach (Deposit deposit in client.Deposits)
+                Context.Deposits.Remove(deposit);
+            foreach (Loan loan in client.Loans)
+                Context.Loans.Remove(loan);
             Context.Clients.Remove(client);
             Context.SaveChanges();
+            MainViewModel.Log($"Удален клиент {client}.");
         }
         private void CellEditEnding(object e)
         {
