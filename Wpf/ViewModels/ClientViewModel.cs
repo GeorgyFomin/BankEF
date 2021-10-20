@@ -3,6 +3,7 @@ using BankEF.Dialogs;
 using Domain.Model;
 using Persistence.Context;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -57,10 +58,14 @@ namespace BankEF.ViewModels
         {
             if (client == null || MessageBox.Show($"Удалить клиента {client}?", $"Удаление клиента {client}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
+            // Удаляем из списка клиентов того отдела, к которому клиент принадлежит.
+            Context.Departments.First((g) => g == client.Department).Clients.Remove(client);
+            // Удаляем все счета клиента.
             foreach (Deposit deposit in client.Deposits)
                 Context.Deposits.Remove(deposit);
             foreach (Loan loan in client.Loans)
                 Context.Loans.Remove(loan);
+            // Удаляем самого клиента.
             Context.Clients.Remove(client);
             Context.SaveChanges();
             MainViewModel.Log($"Удален клиент {client}.");
