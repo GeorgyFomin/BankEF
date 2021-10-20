@@ -58,8 +58,6 @@ namespace BankEF.ViewModels
         {
             if (client == null || MessageBox.Show($"Удалить клиента {client}?", $"Удаление клиента {client}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
-            // Удаляем из списка клиентов того отдела, к которому клиент принадлежит.
-            Context.Departments.First((g) => g == client.Department).Clients.Remove(client);
             // Удаляем все счета клиента.
             foreach (Deposit deposit in client.Deposits)
                 Context.Deposits.Remove(deposit);
@@ -67,6 +65,8 @@ namespace BankEF.ViewModels
                 Context.Loans.Remove(loan);
             // Удаляем самого клиента.
             Context.Clients.Remove(client);
+            // Удаляем из списка клиентов того отдела, к которому клиент принадлежит.
+            Context.Departments.First((g) => g == client.Department).Clients.Remove(client);
             Context.SaveChanges();
             MainViewModel.Log($"Удален клиент {client}.");
         }
