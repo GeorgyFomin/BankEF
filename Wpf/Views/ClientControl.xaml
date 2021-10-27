@@ -31,6 +31,9 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" EditingElementStyle="{StaticResource EditingCellTextBox}"/>
             </DataGrid.Columns>
+            <DataGrid.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding RemoveClientCommand}"/>
+            </DataGrid.InputBindings>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseRightButtonUp">
                     <i:InvokeCommandAction Command="{Binding RemoveClientCommand}" CommandParameter="{Binding ElementName=clientsGrid}"/>

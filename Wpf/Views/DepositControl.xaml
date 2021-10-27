@@ -33,6 +33,9 @@
                 <DataGridCheckBoxColumn x:Name="CapCheck" Header="Cap" Binding="{Binding Cap}"
                 EditingElementStyle="{StaticResource EditCheckboxStyle}" ElementStyle="{StaticResource ElementCheckBoxStyle}"/>
             </DataGrid.Columns>
+            <DataGrid.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding RemoveDepoCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
+            </DataGrid.InputBindings>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>

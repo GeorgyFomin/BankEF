@@ -41,7 +41,7 @@ namespace BankEF.ViewModels
         });
         public ICommand CloseCommand => closeCommand ??= new RelayCommand((e) =>
         {
-            context.SaveChanges();
+            //context.SaveChanges();
             (e as MainWindow).Close();
         });
         public ICommand ListCommand => listCommand ??= new RelayCommand((e) => ViewModel = new ListViewModel());

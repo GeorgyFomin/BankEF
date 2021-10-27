@@ -46,6 +46,11 @@ namespace BankEF.ViewModels
         #endregion
         private void SelectionChanged(object e)
         {
+            if (endEditFlag)
+            {
+                Context.SaveChanges();
+                endEditFlag = false;
+            }
             // Определяем выделенный элемент списка.
             object selItem = (e as DataGrid).SelectedItem;
             // Фильтруем ссылку.
@@ -70,10 +75,12 @@ namespace BankEF.ViewModels
             Context.SaveChanges();
             MainViewModel.Log($"Удален клиент {client}.");
         }
+        private bool endEditFlag;
         private void CellEditEnding(object e)
         {
             if (client == null)
                 return;
+            endEditFlag = true;
             if (client.Department == null)
             {
                 // Выбор отдела, к которому относится клиент.

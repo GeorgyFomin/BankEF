@@ -26,6 +26,7 @@ namespace BankEF.ViewModels
         /// Хранит флаг, определяющий состояние выборки из списка клиента открываемого депозита.
         /// </summary>
         private bool clientDoSelected;
+        private bool endEditFlag;
         #endregion
         #region Команды управления событиями
         private RelayCommand selectionChangedCommand;
@@ -81,7 +82,15 @@ namespace BankEF.ViewModels
         public bool ClientDoSelected { get => clientDoSelected; set { clientDoSelected = value; RaisePropertyChanged(nameof(ClientDoSelected)); } }
         #endregion
         #region Команды - обработчики событий.
-        public ICommand SelectionChangedCommand => selectionChangedCommand ??= new RelayCommand((e) => Loan = (e as DataGrid).SelectedItem is Loan loan ? loan : null);
+        public ICommand SelectionChangedCommand => selectionChangedCommand ??= new RelayCommand((e) =>
+        {
+            if (endEditFlag)
+            {
+                Context.SaveChanges();
+                endEditFlag = false;
+            }
+            Loan = (e as DataGrid).SelectedItem is Loan loan ? loan : null;
+        });
         public ICommand RemoveLoanCommand => removeLoanCommand ??= new RelayCommand(RemoveLoan);
         public ICommand LoanEditEndingCommand => loanEditEndingCommand ??= new RelayCommand(EditLoan);
         #region Команды выбора клиента вновь созданного кредита
@@ -97,6 +106,7 @@ namespace BankEF.ViewModels
         #endregion
         private void EditLoan(object e)
         {
+            endEditFlag = true;
             void InsertLoanIntoClient()
             {
                 loan.Client = client;

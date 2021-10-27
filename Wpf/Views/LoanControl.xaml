@@ -26,6 +26,9 @@
             <DataGrid.ColumnHeaderStyle>
                 <Style BasedOn="{StaticResource ResourceKey=BlackNavy}"/>
             </DataGrid.ColumnHeaderStyle>
+            <DataGrid.InputBindings>
+                <KeyBinding Key="Delete" Command="{Binding RemoveLoanCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
+            </DataGrid.InputBindings>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseRightButtonDown">
                     <i:InvokeCommandAction Command="{Binding RemoveLoanCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>

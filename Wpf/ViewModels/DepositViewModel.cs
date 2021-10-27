@@ -108,7 +108,15 @@ namespace BankEF.ViewModels
         public decimal TransferAmount { get => transferAmount; set { transferAmount = value; RaisePropertyChanged(nameof(TransferAmount)); } }
         #endregion
         public ICommand SelectionChangedCommand => selectionChangedCommand ??=
-            new RelayCommand((e) => SourceTransferDepoSelected = (Depo = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null);
+            new RelayCommand((e) =>
+            {
+                if (endEditFlag)
+                {
+                    Context.SaveChanges();
+                    endEditFlag = false;
+                }
+                SourceTransferDepoSelected = (Depo = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null;
+            });
         public ICommand DepoEditEndingCommand => depoEditEndingCommand ??= new RelayCommand(DepoEditEnding);
         public ICommand RemoveDepoCommand => removeDepoCommand ??= new RelayCommand(RemoveDepo);
         #region Команды перечисления средств с одного депозита на другой.
@@ -119,6 +127,7 @@ namespace BankEF.ViewModels
         #endregion
         #endregion
         public DepositViewModel() {}
+        private bool endEditFlag;
         private void DepoEditEnding(object e)
         {
             void InsertDepoIntoClient()
@@ -127,6 +136,7 @@ namespace BankEF.ViewModels
                 client.Deposits.Add(depo);
                 RaisePropertyChanged(nameof(Depo));
             }
+            endEditFlag = true;
             if (depo.Client == default)
             {
                 bool flag;
