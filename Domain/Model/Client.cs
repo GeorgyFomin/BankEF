@@ -7,7 +7,7 @@ namespace Domain.Model
 {
     public partial class Client : Named
     {
-        public Department Department { get; set; }
+        public virtual Department Department { get; set; }
         private ICollection<Deposit> deposits = new HashSet<Deposit>();
         public virtual ICollection<Deposit> Deposits
         {

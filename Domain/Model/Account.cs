@@ -6,7 +6,7 @@ namespace Domain.Model
     {
         public const decimal MinSize = .01m;
         public int Number { get; private set; }
-        public Client Client { get; set; }
+        public virtual Client Client { get; set; }
         private decimal size = MinSize;
         public decimal Size { get => size; set => size = value < MinSize ? MinSize : value; }
         public double Rate { get; set; }
