@@ -21,8 +21,9 @@ namespace BankEF.ViewModels
         private RelayCommand depSelDefaultCommand;
         private RelayCommand cellEditEndingCommand;
         private RelayCommand selectionChangedCommand;
-        private Client client;
+        private Client selClient;
         private Department dep;
+        private bool endEditFlag;
         #endregion
         #region Properties
         public DataContext Context { get; set; }
@@ -57,31 +58,30 @@ namespace BankEF.ViewModels
             if (selItem == null)
                 return;
             // Запоминаем выделенного клиента.
-            client = selItem as Client;
+            selClient = selItem as Client;
         }
         private void RemoveClient(object e)
         {
-            if (client == null || MessageBox.Show($"Удалить клиента {client}?", $"Удаление клиента {client}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            if (selClient == null || MessageBox.Show($"Удалить клиента {selClient}?", $"Удаление клиента {selClient}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
             // Удаляем все счета клиента.
-            foreach (Deposit deposit in client.Deposits)
+            foreach (Deposit deposit in selClient.Deposits)
                 Context.Deposits.Remove(deposit);
-            foreach (Loan loan in client.Loans)
+            foreach (Loan loan in selClient.Loans)
                 Context.Loans.Remove(loan);
             // Удаляем самого клиента.
-            Context.Clients.Remove(client);
+            Context.Clients.Remove(selClient);
             // Удаляем из списка клиентов того отдела, к которому клиент принадлежит.
-            Context.Departments.First((g) => g == client.Department).Clients.Remove(client);
+            Context.Departments.First((g) => g == selClient.Department).Clients.Remove(selClient);
             Context.SaveChanges();
-            MainViewModel.Log($"Удален клиент {client}.");
+            MainViewModel.Log($"Удален клиент {selClient}.");
         }
-        private bool endEditFlag;
         private void CellEditEnding(object e)
         {
-            if (client == null)
+            if (selClient == null)
                 return;
             endEditFlag = true;
-            if (client.Department == null)
+            if (selClient.Department == null)
             {
                 // Выбор отдела, к которому относится клиент.
                 // Выбираем по умолчанию.
@@ -90,11 +90,11 @@ namespace BankEF.ViewModels
                 // Выбираем из списка.
                 _ = new DepsDialog { DataContext = this }.ShowDialog();
                 // Добавляем в отдел клиента.
-                Dep.Clients.Add(client);
-                MainViewModel.Log($"В отдел {dep} добавлен клиент {client}.");
+                Dep.Clients.Add(selClient);
+                MainViewModel.Log($"В отдел {dep} добавлен клиент {selClient}.");
             }
             else
-                MainViewModel.Log($"Отредактирован клиент {client}");
+                MainViewModel.Log($"Отредактирован клиент {selClient}");
         }
     }
 }

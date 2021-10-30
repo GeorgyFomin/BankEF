@@ -39,11 +39,7 @@ namespace BankEF.ViewModels
             window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
             window.MaxIconBlock.Icon = window.WindowState == WindowState.Maximized ? IconChar.WindowRestore : IconChar.WindowMaximize;
         });
-        public ICommand CloseCommand => closeCommand ??= new RelayCommand((e) =>
-        {
-            //context.SaveChanges();
-            (e as MainWindow).Close();
-        });
+        public ICommand CloseCommand => closeCommand ??= new RelayCommand((e) => (e as MainWindow).Close());
         public ICommand ListCommand => listCommand ??= new RelayCommand((e) => ViewModel = new ListViewModel());
         public ICommand ClientsCommand => clientsCommand ??= new RelayCommand((e) => ViewModel = new ClientViewModel()
         {

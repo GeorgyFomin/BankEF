@@ -25,7 +25,7 @@ namespace BankEF.ViewModels
         /// <summary>
         /// Хранит флаг, определяющий состояние выборки депозита, из которого будут переведены средства.
         /// </summary>
-        private bool sourceTransferDepoSelected;
+        private bool isDepoSelected;
         /// <summary>
         /// Хранит флаг, определяющий доступность совершения транзакции.
         /// </summary>
@@ -46,6 +46,7 @@ namespace BankEF.ViewModels
         /// Хранит флаг активации списка депозитов, на который могут быть переведены средства.
         /// </summary>
         private bool targetTransferListEnabled;
+        private bool endEditFlag;
         private bool clientDoSelected;
         private RelayCommand selectionChangedCommand;
         private RelayCommand depoEditEndingCommand;
@@ -97,11 +98,11 @@ namespace BankEF.ViewModels
         /// </summary>
         public ObservableCollection<Client> Clients => Context.Clients.Local.ToObservableCollection();
         #region Команды выбора клиента для вновь открываемого депозита.
-        public ICommand ClientSelectedCommand => clientSelectedCommand ?? (clientSelectedCommand = new RelayCommand((e) => ClientDoSelected = true));
-        public ICommand OKClientSelectionCommand => oKClientSelectionCommand ?? (oKClientSelectionCommand = new RelayCommand(SelectNewDepositClient));
+        public ICommand ClientSelectedCommand => clientSelectedCommand ??= new RelayCommand((e) => ClientDoSelected = true);
+        public ICommand OKClientSelectionCommand => oKClientSelectionCommand ??= new RelayCommand(SelectNewDepositClient);
         #endregion
         #region Transfer properties
-        public bool SourceTransferDepoSelected { get => sourceTransferDepoSelected; set { sourceTransferDepoSelected = value; RaisePropertyChanged(nameof(SourceTransferDepoSelected)); } }
+        public bool IsDepoSelected { get => isDepoSelected; set { isDepoSelected = value; RaisePropertyChanged(nameof(IsDepoSelected)); } }
         public Account TargetTransferDepo { get => targetTransferDepo; set { targetTransferDepo = value; RaisePropertyChanged(nameof(TargetTransferDepo)); } }
         public bool TransferEnabled { get => transferEnabled; set { transferEnabled = value; RaisePropertyChanged(nameof(TransferEnabled)); } }
         public bool TransferSumOKEnabled { get => transferSumOKEnabled; set { transferSumOKEnabled = value; RaisePropertyChanged(nameof(TransferSumOKEnabled)); } }
@@ -115,7 +116,7 @@ namespace BankEF.ViewModels
                     Context.SaveChanges();
                     endEditFlag = false;
                 }
-                SourceTransferDepoSelected = (Depo = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null;
+                IsDepoSelected = (Depo = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null;
             });
         public ICommand DepoEditEndingCommand => depoEditEndingCommand ??= new RelayCommand(DepoEditEnding);
         public ICommand RemoveDepoCommand => removeDepoCommand ??= new RelayCommand(RemoveDepo);
@@ -126,16 +127,8 @@ namespace BankEF.ViewModels
         public ICommand TargetTransferDepoSelectionChangedCommand => targetTransferDepoSelectionChangedCommand ??= new RelayCommand(SelectTargetTransferDepo);
         #endregion
         #endregion
-        public DepositViewModel() {}
-        private bool endEditFlag;
         private void DepoEditEnding(object e)
         {
-            void InsertDepoIntoClient()
-            {
-                depo.Client = client;
-                client.Deposits.Add(depo);
-                RaisePropertyChanged(nameof(Depo));
-            }
             endEditFlag = true;
             if (depo.Client == default)
             {
@@ -143,7 +136,7 @@ namespace BankEF.ViewModels
                 do
                 {
                     if (flag = (bool)new ClientsDialog { DataContext = this }.ShowDialog() && client != null)
-                        InsertDepoIntoClient();
+                        client.Deposits.Add(depo);
                 } while (!flag);
                 MainViewModel.Log($"Клиенту {client} открыт депозит {depo}.");
             }

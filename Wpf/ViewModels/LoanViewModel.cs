@@ -109,9 +109,7 @@ namespace BankEF.ViewModels
             endEditFlag = true;
             void InsertLoanIntoClient()
             {
-                loan.Client = client;
                 client.Loans.Add(loan);
-                RaisePropertyChanged(nameof(Loan));
                 MainViewModel.Log($"Клиенту {client} открыт кредит {loan}.");
             }
             if (loan.Client == default)
@@ -129,8 +127,6 @@ namespace BankEF.ViewModels
         }
         private void RemoveLoan(object e)
         {
-            object item = (e as DataGrid).SelectedItem;
-            Loan loan = item == null ? null : (Loan)item;
             if (loan == null || MessageBox.Show($"Удалить кредит {loan}?", $"Удаление кредита {loan}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
             {
                 return;

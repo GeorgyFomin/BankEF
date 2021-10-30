@@ -17,7 +17,7 @@
         <StackPanel Orientation="Horizontal">
             <TextBlock Text="Deposits" FontSize="20"/>
             <Button Content="Оформить перевод" Style="{StaticResource headerBtn}" FontSize="20" Background="#00000000" Margin="10,0,0,0" 
-                    IsDefault="True" Command="{Binding TransferCommand}" CommandParameter="{Binding ElementName=depoGrid}" IsEnabled="{Binding SourceTransferDepoSelected}" BorderBrush="#FF40E80F">
+                    IsDefault="True" Command="{Binding TransferCommand}" CommandParameter="{Binding ElementName=depoGrid}" IsEnabled="{Binding IsDepoSelected}" BorderBrush="#FF40E80F">
             </Button>
         </StackPanel>
         <DataGrid RowHeaderStyle="{StaticResource BlackNavy}" Style="{StaticResource ResourceKey=BlackNavy}" x:Name="depoGrid" Grid.Row="1" 
@@ -40,12 +40,12 @@
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
                 </i:EventTrigger>
-                <i:EventTrigger EventName="MouseRightButtonDown">
-                    <i:InvokeCommandAction Command="{Binding RemoveDepoCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
-                </i:EventTrigger>
                 <i:EventTrigger EventName="CellEditEnding">
                     <i:InvokeCommandAction Command="{Binding DepoEditEndingCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
                 </i:EventTrigger>
+                <!--<i:EventTrigger EventName="MouseRightButtonDown">
+                    <i:InvokeCommandAction Command="{Binding RemoveDepoCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
+                </i:EventTrigger>-->
                 <!--
                 <i:EventTrigger EventName="CurrentCellChanged">
                     <i:InvokeCommandAction Command="{Binding CellChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}" />
