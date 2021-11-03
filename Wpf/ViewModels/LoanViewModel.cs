@@ -26,14 +26,17 @@ namespace BankEF.ViewModels
         /// Хранит флаг, определяющий состояние выборки из списка клиента открываемого депозита.
         /// </summary>
         private bool clientDoSelected;
-        private bool endEditFlag;
         #endregion
         #region Команды управления событиями
-        private RelayCommand selectionChangedCommand;
-        private RelayCommand removeLoanCommand;
-        private RelayCommand loanEditEndingCommand;
+        private RelayCommand loanSelectionCommand;
+        private RelayCommand loanRemoveCommand;
+        private RelayCommand loanCellEditEndCommand;
         private RelayCommand clientSelectedCommand;
         private RelayCommand oKClientSelectionCommand;
+        private RelayCommand loanCellChangedCommand;
+        private RelayCommand loanRowEditEndCommand;
+        private bool blockAccountEditEndingHandler;
+        private bool cellEdited;
         #endregion
         #endregion
         #region Properties
@@ -82,17 +85,11 @@ namespace BankEF.ViewModels
         public bool ClientDoSelected { get => clientDoSelected; set { clientDoSelected = value; RaisePropertyChanged(nameof(ClientDoSelected)); } }
         #endregion
         #region Команды - обработчики событий.
-        public ICommand SelectionChangedCommand => selectionChangedCommand ??= new RelayCommand((e) =>
-        {
-            if (endEditFlag)
-            {
-                Context.SaveChanges();
-                endEditFlag = false;
-            }
-            Loan = (e as DataGrid).SelectedItem is Loan loan ? loan : null;
-        });
-        public ICommand RemoveLoanCommand => removeLoanCommand ??= new RelayCommand(RemoveLoan);
-        public ICommand LoanEditEndingCommand => loanEditEndingCommand ??= new RelayCommand(EditLoan);
+        public ICommand LoanSelectionCommand => loanSelectionCommand ??= new RelayCommand((e) => Loan = (e as DataGrid).SelectedItem is Loan loan ? loan : null);
+        public ICommand LoanRemoveCommand => loanRemoveCommand ??= new RelayCommand(RemoveLoan);
+        public ICommand LoanCellEditEndCommand => loanCellEditEndCommand ??= new RelayCommand((e) => cellEdited = true);
+        public ICommand LoanCellChangedCommand => loanCellChangedCommand ??= new RelayCommand(LoanCellChanged);
+        public ICommand LoanRowEditEndCommand => loanRowEditEndCommand ??= new RelayCommand(LoanRowEditEnd);
         #region Команды выбора клиента вновь созданного кредита
         public ICommand ClientSelectedCommand => clientSelectedCommand ??= new RelayCommand((e) => ClientDoSelected = true);
         public ICommand OKClientSelectionCommand => oKClientSelectionCommand ??= new RelayCommand((e) =>
@@ -104,27 +101,6 @@ namespace BankEF.ViewModels
         #endregion
         #endregion
         #endregion
-        private void EditLoan(object e)
-        {
-            endEditFlag = true;
-            void InsertLoanIntoClient()
-            {
-                client.Loans.Add(loan);
-                MainViewModel.Log($"Клиенту {client} открыт кредит {loan}.");
-            }
-            if (loan.Client == default)
-            {
-                bool flag;
-                do
-                {
-                    if (flag = (bool)new ClientsDialog { DataContext = this }.ShowDialog() && client != null)
-                        InsertLoanIntoClient();
-                } while (!flag);
-            }
-            else
-                MainViewModel.Log($"Поля кредита {loan} отредактированы.");
-
-        }
         private void RemoveLoan(object e)
         {
             if (loan == null || MessageBox.Show($"Удалить кредит {loan}?", $"Удаление кредита {loan}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
@@ -133,6 +109,39 @@ namespace BankEF.ViewModels
             }
             Context.Loans.Remove(loan);
             Context.SaveChanges();
+        }
+        private void LoanCellChanged(object e)
+        {
+            if (!cellEdited)
+                return;
+            cellEdited = false;
+            (e as DataGrid).CommitEdit();
+            Context.SaveChanges();
+            MainViewModel.Log($"Кредит {loan} отредактирован.");
+            //MessageBox.Show("Cell Changed");
+        }
+        private void LoanRowEditEnd(object e)
+        {
+            if (blockAccountEditEndingHandler) return;
+            DataGrid grid = e as DataGrid;
+            //MessageBox.Show("Row Edited");
+            cellEdited = false;
+            if (loan.Client == default)
+            {
+                bool flag;
+                do
+                {
+                    if (flag = (bool)new ClientsDialog { DataContext = this }.ShowDialog() && client != null)
+                        client.Loans.Add(loan);
+                } while (!flag);
+                MainViewModel.Log($"Клиенту {client} открыт кредит {loan.Number}.");
+            }
+            else
+                MainViewModel.Log($"Поля кредита №{loan.Number} отредактированы.");
+            blockAccountEditEndingHandler = true;
+            grid.CommitEdit();
+            Context.SaveChanges();
+            blockAccountEditEndingHandler = false;
         }
     }
 }

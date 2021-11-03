@@ -41,15 +41,15 @@
                     <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CellEditEnding">
-                    <i:InvokeCommandAction Command="{Binding DepoEditEndingCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
+                    <i:InvokeCommandAction Command="{Binding DepoCellEditEndCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
                 </i:EventTrigger>
-                <!--<i:EventTrigger EventName="MouseRightButtonDown">
-                    <i:InvokeCommandAction Command="{Binding RemoveDepoCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
-                </i:EventTrigger>-->
-                <!--
+                <i:EventTrigger EventName="RowEditEnding">
+                    <i:InvokeCommandAction Command="{Binding DepoRowEditEndCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
+                </i:EventTrigger>
+
                 <i:EventTrigger EventName="CurrentCellChanged">
                     <i:InvokeCommandAction Command="{Binding CellChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}" />
-                </i:EventTrigger>-->
+                </i:EventTrigger>
             </i:Interaction.Triggers>
         </DataGrid>
     </Grid>

@@ -16,14 +16,17 @@ namespace BankEF.ViewModels
         /// Хранит индекс отдела по умолчанию, в который добавляется клиент.
         /// </summary>
         private const int DepClientAddToDefault = 0;
-        private RelayCommand removeClientCommand;
+        private RelayCommand clientRemoveCommand;
         private RelayCommand oKDepartmentCommand;
         private RelayCommand depSelDefaultCommand;
-        private RelayCommand cellEditEndingCommand;
-        private RelayCommand selectionChangedCommand;
-        private Client selClient;
-        private Department dep;
-        private bool endEditFlag;
+        private RelayCommand clientCellEditEndCommand;
+        private RelayCommand clientSelectionCommand;
+        private RelayCommand clientCellChangedCommand;
+        private RelayCommand clientRowEditEndCommand;
+        private bool blockAccountEditEndingHandler;
+        private bool cellEdited;
+        private Client client;
+        private Department department;
         #endregion
         #region Properties
         public DataContext Context { get; set; }
@@ -31,70 +34,73 @@ namespace BankEF.ViewModels
         /// Устанавливает и возвращает ссылку на текущий источник данных в таблице. 
         /// </summary>
         public object DataSource { get; set; }
-        public Department Dep { get => dep; set { dep = value; RaisePropertyChanged(nameof(Dep)); } }
-        public ObservableCollection<Department> Deps { get => Context.Departments.Local.ToObservableCollection(); }
-        public ICommand SelectionChangedCommand => selectionChangedCommand ??= new RelayCommand(SelectionChanged);
-        public ICommand RemoveClientCommand => removeClientCommand ??= new RelayCommand(RemoveClient);
-        public ICommand CellEditEndingCommand => cellEditEndingCommand ??= new RelayCommand(CellEditEnding);
-        public ICommand OKDepartmentCommand => oKDepartmentCommand ??= new RelayCommand((e) =>
-        {
-            DepsDialog dialog = e as DepsDialog;
-            Dep = dialog.depListBox.SelectedItem as Department;
-            dialog.DialogResult = true;
-        });
+        public Client Client { get => client; set { client = value; RaisePropertyChanged(nameof(Client)); } }
+        public Department Department { get => department; set { department = value; RaisePropertyChanged(nameof(Department)); } }
+        public ObservableCollection<Department> Departments { get => Context.Departments.Local.ToObservableCollection(); }
+        public ICommand ClientSelectionCommand => clientSelectionCommand ??= new RelayCommand((e) => Client = (e as DataGrid).SelectedItem is Client client ? client : null);
+        public ICommand ClientRemoveCommand => clientRemoveCommand ??= new RelayCommand(RemoveClient);
+        public ICommand ClientCellEditEndCommand => clientCellEditEndCommand ??= new RelayCommand((e) => cellEdited = true);
+        public ICommand OKDepartmentCommand => oKDepartmentCommand ??= new RelayCommand(OkDepartment);
         public ICommand DepSelDefaultCommand
             => depSelDefaultCommand ??= new RelayCommand((e) => ((ListBox)e).SelectedItem = ((ListBox)e).Items[DepClientAddToDefault]);
+        public ICommand ClientCellChangedCommand => clientCellChangedCommand ??= new RelayCommand(ClientCellChanged);
+        public ICommand ClientRowEditEndCommand => clientRowEditEndCommand ??= new RelayCommand(ClientRowEditEnd);
         #endregion
-        private void SelectionChanged(object e)
+        private void OkDepartment(object e)
         {
-            if (endEditFlag)
-            {
-                Context.SaveChanges();
-                endEditFlag = false;
-            }
-            // Определяем выделенный элемент списка.
-            object selItem = (e as DataGrid).SelectedItem;
-            // Фильтруем ссылку.
-            if (selItem == null)
-                return;
-            // Запоминаем выделенного клиента.
-            selClient = selItem as Client;
+            DepsDialog dialog = e as DepsDialog;
+            Department = dialog.depListBox.SelectedItem as Department;
+            dialog.DialogResult = true;
         }
         private void RemoveClient(object e)
         {
-            if (selClient == null || MessageBox.Show($"Удалить клиента {selClient}?", $"Удаление клиента {selClient}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            if (client == null || MessageBox.Show($"Удалить клиента {client}?", $"Удаление клиента {client}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
             // Удаляем все счета клиента.
-            foreach (Deposit deposit in selClient.Deposits)
+            foreach (Deposit deposit in client.Deposits)
                 Context.Deposits.Remove(deposit);
-            foreach (Loan loan in selClient.Loans)
+            foreach (Loan loan in client.Loans)
                 Context.Loans.Remove(loan);
             // Удаляем самого клиента.
-            Context.Clients.Remove(selClient);
+            Context.Clients.Remove(client);
             // Удаляем из списка клиентов того отдела, к которому клиент принадлежит.
-            Context.Departments.First((g) => g == selClient.Department).Clients.Remove(selClient);
+            Context.Departments.First((g) => g == client.Department).Clients.Remove(client);
             Context.SaveChanges();
-            MainViewModel.Log($"Удален клиент {selClient}.");
+            MainViewModel.Log($"Удален клиент {client}.");
         }
-        private void CellEditEnding(object e)
+        private void ClientCellChanged(object e)
         {
-            if (selClient == null)
+            if (!cellEdited)
                 return;
-            endEditFlag = true;
-            if (selClient.Department == null)
+            cellEdited = false;
+            (e as DataGrid).CommitEdit();
+            Context.SaveChanges();
+            MainViewModel.Log($"Клиент {client} отредактирован.");
+            //MessageBox.Show("Cell Changed");
+        }
+        private void ClientRowEditEnd(object e)
+        {
+            if (blockAccountEditEndingHandler) return;
+            cellEdited = false;
+            if (client.Department == null)
             {
                 // Выбор отдела, к которому относится клиент.
                 // Выбираем по умолчанию.
-                Dep = Context.Departments.Local.ToBindingList()[DepClientAddToDefault];
+                Department = Context.Departments.Local.ToBindingList()[DepClientAddToDefault];
                 // Показываем список отделов в диалоговом рeжиме.
                 // Выбираем из списка.
                 _ = new DepsDialog { DataContext = this }.ShowDialog();
                 // Добавляем в отдел клиента.
-                Dep.Clients.Add(selClient);
-                MainViewModel.Log($"В отдел {dep} добавлен клиент {selClient}.");
+                Department.Clients.Add(client);
+                MainViewModel.Log($"В отдел {department} добавлен клиент {client}.");
             }
             else
-                MainViewModel.Log($"Отредактирован клиент {selClient}");
+                MainViewModel.Log($"Отредактирован клиент {client}");
+            //MessageBox.Show("Row Edited");
+            blockAccountEditEndingHandler = true;
+            (e as DataGrid).CommitEdit();
+            Context.SaveChanges();
+            blockAccountEditEndingHandler = false;
         }
     }
 }

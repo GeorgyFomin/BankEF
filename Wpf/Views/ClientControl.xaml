@@ -18,35 +18,26 @@
                    Background="{StaticResource mainBckgr}" FontSize="24"/>
         <DataGrid RowHeaderStyle="{StaticResource BlackNavy}" x:Name="clientsGrid" Grid.Row="1" ItemsSource="{Binding DataSource}" 
                   AutoGenerateColumns="False" Style="{StaticResource ResourceKey=BlackNavy}" 
-                  CellStyle="{StaticResource CellStyle}" RowStyle="{StaticResource RowStyle}">
-            <!--RowStyle="{StaticResource RowStyle}" -->
-            <!--<DataGrid.RowStyle>
-                <Style TargetType="DataGridRow" BasedOn="{StaticResource RowStyle}">
-                    <Setter Property="local:MyBehavior.Command" Value="{Binding DataContext.BeamGridRmbCommand,RelativeSource={RelativeSource AncestorType=DataGrid}}" />
-                </Style>
-            </DataGrid.RowStyle>-->
-            <DataGrid.ColumnHeaderStyle>
-                <Style BasedOn="{StaticResource ResourceKey=BlackNavy}"/>
-            </DataGrid.ColumnHeaderStyle>
+                  CellStyle="{StaticResource CellStyle}" RowStyle="{StaticResource RowStyle}" ColumnHeaderStyle="{StaticResource ResourceKey=BlackNavy}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" EditingElementStyle="{StaticResource EditingCellTextBox}"/>
             </DataGrid.Columns>
             <DataGrid.InputBindings>
-                <KeyBinding Key="Delete" Command="{Binding RemoveClientCommand}"/>
+                <KeyBinding Key="Delete" Command="{Binding ClientRemoveCommand}"/>
             </DataGrid.InputBindings>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=clientsGrid}"/>
+                    <i:InvokeCommandAction Command="{Binding ClientSelectionCommand}" CommandParameter="{Binding ElementName=clientsGrid}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CellEditEnding">
-                    <i:InvokeCommandAction Command="{Binding CellEditEndingCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
+                    <i:InvokeCommandAction Command="{Binding ClientCellEditEndCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
                 </i:EventTrigger>
-                <!--<i:EventTrigger EventName="MouseRightButtonUp">
-                    <i:InvokeCommandAction Command="{Binding RemoveClientCommand}" CommandParameter="{Binding ElementName=clientsGrid}"/>
-                </i:EventTrigger>-->
-                <!--<i:EventTrigger EventName="CurrentCellChanged">
-                    <i:InvokeCommandAction Command="{Binding CellChangedCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
-                </i:EventTrigger>-->
+                <i:EventTrigger EventName="RowEditEnding">
+                    <i:InvokeCommandAction Command="{Binding ClientRowEditEndCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="CurrentCellChanged">
+                    <i:InvokeCommandAction Command="{Binding ClientCellChangedCommand}" CommandParameter="{Binding ElementName=clientsGrid}" />
+                </i:EventTrigger>
             </i:Interaction.Triggers>
         </DataGrid>
     </Grid>

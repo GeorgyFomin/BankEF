@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows;
 using Domain.Model;
@@ -21,7 +19,7 @@ namespace BankEF.ViewModels
         /// <summary>
         /// Хранит ссылку на текущий депозит.
         /// </summary>
-        private Deposit depo;
+        private Deposit deposit;
         /// <summary>
         /// Хранит флаг, определяющий состояние выборки депозита, из которого будут переведены средства.
         /// </summary>
@@ -46,10 +44,11 @@ namespace BankEF.ViewModels
         /// Хранит флаг активации списка депозитов, на который могут быть переведены средства.
         /// </summary>
         private bool targetTransferListEnabled;
-        private bool endEditFlag;
+        private bool cellEdited;
+        private bool blockAccountEditEndingHandler;
         private bool clientDoSelected;
         private RelayCommand selectionChangedCommand;
-        private RelayCommand depoEditEndingCommand;
+        private RelayCommand depoCellEditEndCommand;
         private RelayCommand removeDepoCommand;
         private RelayCommand clientSelectedCommand;
         private RelayCommand oKClientSelectionCommand;
@@ -57,13 +56,15 @@ namespace BankEF.ViewModels
         private RelayCommand targetTransferDepoSelectionChangedCommand;
         private RelayCommand oKTransferCommand;
         private RelayCommand transfAmountChangedCommand;
+        private RelayCommand depoRowEditEndCommand;
+        private RelayCommand cellChangedCommand;
         #endregion
         #region Properties
         public bool ClientDoSelected { get => clientDoSelected; set { clientDoSelected = value; RaisePropertyChanged(nameof(ClientDoSelected)); } }
         /// <summary>
         /// Устанавливает и возвращает ссылку на текущий депозит.
         /// </summary>
-        public Deposit Depo { get => depo; set { depo = value; RaisePropertyChanged(nameof(Depo)); } }
+        public Deposit Deposit { get => deposit; set { deposit = value; RaisePropertyChanged(nameof(Deposit)); } }
         /// <summary>
         /// Возвращает список всех депозитов банка.
         /// </summary>
@@ -77,7 +78,7 @@ namespace BankEF.ViewModels
                         foreach (Deposit deposit in client.Deposits)
                         {
                             // Блокируем появление в списке депозитов, на которые могут быть переведены средства, депозит Depo, с которого средства списываются.
-                            if (!targetTransferListEnabled || deposit.Client != Depo?.Client)
+                            if (!targetTransferListEnabled || deposit.Client != Deposit?.Client)
                                 deposits.Add(deposit);
                         }
 
@@ -109,16 +110,10 @@ namespace BankEF.ViewModels
         public decimal TransferAmount { get => transferAmount; set { transferAmount = value; RaisePropertyChanged(nameof(TransferAmount)); } }
         #endregion
         public ICommand SelectionChangedCommand => selectionChangedCommand ??=
-            new RelayCommand((e) =>
-            {
-                if (endEditFlag)
-                {
-                    Context.SaveChanges();
-                    endEditFlag = false;
-                }
-                IsDepoSelected = (Depo = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null;
-            });
-        public ICommand DepoEditEndingCommand => depoEditEndingCommand ??= new RelayCommand(DepoEditEnding);
+            new RelayCommand((e) => IsDepoSelected = (Deposit = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null);
+        public ICommand DepoCellEditEndCommand => depoCellEditEndCommand ??= new RelayCommand((e) => cellEdited = true);
+        public ICommand CellChangedCommand => cellChangedCommand ??= new RelayCommand(CellChanged);
+        public ICommand DepoRowEditEndCommand => depoRowEditEndCommand ??= new RelayCommand(DepoRowEditEnd);
         public ICommand RemoveDepoCommand => removeDepoCommand ??= new RelayCommand(RemoveDepo);
         #region Команды перечисления средств с одного депозита на другой.
         public ICommand TransferCommand => transferCommand ??= new RelayCommand(Transfer);
@@ -127,27 +122,12 @@ namespace BankEF.ViewModels
         public ICommand TargetTransferDepoSelectionChangedCommand => targetTransferDepoSelectionChangedCommand ??= new RelayCommand(SelectTargetTransferDepo);
         #endregion
         #endregion
-        private void DepoEditEnding(object e)
-        {
-            endEditFlag = true;
-            if (depo.Client == default)
-            {
-                bool flag;
-                do
-                {
-                    if (flag = (bool)new ClientsDialog { DataContext = this }.ShowDialog() && client != null)
-                        client.Deposits.Add(depo);
-                } while (!flag);
-                MainViewModel.Log($"Клиенту {client} открыт депозит {depo}.");
-            }
-            else
-                MainViewModel.Log($"Поля депозита №{depo.Number} отредактированы.");
-        }
+        #region Handlers
         private void RemoveDepo(object e)
         {
-            if (depo == null || MessageBox.Show($"Удалить депозит {depo}?", $"Удаление депозита {depo}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+            if (deposit == null || MessageBox.Show($"Удалить депозит {deposit}?", $"Удаление депозита {deposit}", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return;
-            Context.Deposits.Remove(depo);
+            Context.Deposits.Remove(deposit);
             Context.SaveChanges();
         }
         private void SelectNewDepositClient(object e)
@@ -162,13 +142,13 @@ namespace BankEF.ViewModels
             {
                 void DoTransfer()
                 {
-                    if (MessageBox.Show($"Вы действительно хотите перевести со счета №{depo.Number} на счет №{targetTransferDepo.Number} сумму {TransferAmount}?",
+                    if (MessageBox.Show($"Вы действительно хотите перевести со счета №{deposit.Number} на счет №{targetTransferDepo.Number} сумму {TransferAmount}?",
                         "Перевод между счетами", MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                         return;
-                    Depo.Size -= TransferAmount;
+                    Deposit.Size -= TransferAmount;
                     TargetTransferDepo.Size += TransferAmount;
-                    MainViewModel.Log($"Со счета {depo} будет переведено {TransferAmount} на счет {targetTransferDepo}");
-                    string comment = $"Со счета {depo} переведено {TransferAmount} на счет {targetTransferDepo}";
+                    MainViewModel.Log($"Со счета {deposit} будет переведено {TransferAmount} на счет {targetTransferDepo}");
+                    string comment = $"Со счета {deposit} переведено {TransferAmount} на счет {targetTransferDepo}";
                     MainViewModel.Log(comment);
                     MessageBox.Show(comment);
                 }
@@ -178,7 +158,7 @@ namespace BankEF.ViewModels
                 if ((bool)dialog.ShowDialog() && targetTransferDepo != null)
                     DoTransfer();
             }
-            if (depo == null)
+            if (deposit == null)
                 return;
             // Блокируем появление в списке депозитов, на которые могут быть переведены средства, депозит, с которого средства списываются.
             targetTransferListEnabled = true;
@@ -203,15 +183,48 @@ namespace BankEF.ViewModels
             if (!decimal.TryParse((e as TextBox).Text, out decimal amount) || amount <= 0)
                 return;
             TransferAmount = amount;
-            TransferSumOKEnabled = depo.Size - amount >= Account.MinSize;
+            TransferSumOKEnabled = deposit.Size - amount >= Account.MinSize;
             if (!TransferSumOKEnabled)
             {
                 MessageBox.Show(
-                    $"Количество средств {depo.Size} на счету {depo.Number} не допускает сумму {transferAmount} списания.\n" +
-                    $"Максимальная сумма списания {depo.Size - Account.MinSize}");
+                    $"Количество средств {deposit.Size} на счету {deposit.Number} не допускает сумму {transferAmount} списания.\n" +
+                    $"Максимальная сумма списания {deposit.Size - Account.MinSize}");
                 return;
             }
         }
-
+        private void CellChanged(object e)
+        {
+            if (!cellEdited)
+                return;
+            cellEdited = false;
+            (e as DataGrid).CommitEdit();
+            Context.SaveChanges();
+            MainViewModel.Log($"Депозит {deposit} отредактирован.");
+            //MessageBox.Show("Cell Changed");
+        }
+        private void DepoRowEditEnd(object e)
+        {
+            if (blockAccountEditEndingHandler) return;
+            DataGrid grid = e as DataGrid;
+            //MessageBox.Show("Row Edited");
+            cellEdited = false;
+            if (deposit.Client == default)
+            {
+                bool flag;
+                do
+                {
+                    if (flag = (bool)new ClientsDialog { DataContext = this }.ShowDialog() && client != null)
+                        client.Deposits.Add(deposit);
+                } while (!flag);
+                MainViewModel.Log($"Клиенту {client} открыт депозит {deposit.Number}.");
+            }
+            else
+                MainViewModel.Log($"Поля депозита №{deposit.Number} отредактированы.");
+            blockAccountEditEndingHandler = true;
+            grid.CommitEdit();
+            Context.SaveChanges();
+            blockAccountEditEndingHandler = false;
+        }
+        #endregion
     }
 }
