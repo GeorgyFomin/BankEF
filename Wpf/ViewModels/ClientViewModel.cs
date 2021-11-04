@@ -15,10 +15,10 @@ namespace BankEF.ViewModels
         /// <summary>
         /// Хранит индекс отдела по умолчанию, в который добавляется клиент.
         /// </summary>
-        private const int DepClientAddToDefault = 0;
+        private const int DefaultDepartmentNumber = 0;
         private RelayCommand clientRemoveCommand;
-        private RelayCommand oKDepartmentCommand;
-        private RelayCommand depSelDefaultCommand;
+        private RelayCommand departmentSelectedCommand;
+        private RelayCommand defaultDepartmentCommand;
         private RelayCommand clientCellEditEndCommand;
         private RelayCommand clientSelectionCommand;
         private RelayCommand clientCellChangedCommand;
@@ -40,13 +40,13 @@ namespace BankEF.ViewModels
         public ICommand ClientSelectionCommand => clientSelectionCommand ??= new RelayCommand((e) => Client = (e as DataGrid).SelectedItem is Client client ? client : null);
         public ICommand ClientRemoveCommand => clientRemoveCommand ??= new RelayCommand(RemoveClient);
         public ICommand ClientCellEditEndCommand => clientCellEditEndCommand ??= new RelayCommand((e) => cellEdited = true);
-        public ICommand OKDepartmentCommand => oKDepartmentCommand ??= new RelayCommand(OkDepartment);
-        public ICommand DepSelDefaultCommand
-            => depSelDefaultCommand ??= new RelayCommand((e) => ((ListBox)e).SelectedItem = ((ListBox)e).Items[DepClientAddToDefault]);
+        public ICommand DepartmentSelectedCommand => departmentSelectedCommand ??= new RelayCommand(DepartmentSelection);
+        public ICommand DefaultDepartmentCommand
+            => defaultDepartmentCommand ??= new RelayCommand((e) => ((ListBox)e).SelectedItem = ((ListBox)e).Items[DefaultDepartmentNumber]);
         public ICommand ClientCellChangedCommand => clientCellChangedCommand ??= new RelayCommand(ClientCellChanged);
         public ICommand ClientRowEditEndCommand => clientRowEditEndCommand ??= new RelayCommand(ClientRowEditEnd);
         #endregion
-        private void OkDepartment(object e)
+        private void DepartmentSelection(object e)
         {
             DepsDialog dialog = e as DepsDialog;
             Department = dialog.depListBox.SelectedItem as Department;
@@ -86,7 +86,7 @@ namespace BankEF.ViewModels
             {
                 // Выбор отдела, к которому относится клиент.
                 // Выбираем по умолчанию.
-                Department = Context.Departments.Local.ToBindingList()[DepClientAddToDefault];
+                Department = Context.Departments.Local.ToBindingList()[DefaultDepartmentNumber];
                 // Показываем список отделов в диалоговом рeжиме.
                 // Выбираем из списка.
                 _ = new DepsDialog { DataContext = this }.ShowDialog();

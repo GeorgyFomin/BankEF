@@ -47,17 +47,17 @@ namespace BankEF.ViewModels
         private bool cellEdited;
         private bool blockAccountEditEndingHandler;
         private bool clientDoSelected;
-        private RelayCommand selectionChangedCommand;
+        private RelayCommand depoSelectedCommand;
         private RelayCommand depoCellEditEndCommand;
-        private RelayCommand removeDepoCommand;
+        private RelayCommand depoRemoveCommand;
         private RelayCommand clientSelectedCommand;
         private RelayCommand oKClientSelectionCommand;
         private RelayCommand transferCommand;
-        private RelayCommand targetTransferDepoSelectionChangedCommand;
+        private RelayCommand targetDepoSelectedCommand;
         private RelayCommand oKTransferCommand;
         private RelayCommand transfAmountChangedCommand;
         private RelayCommand depoRowEditEndCommand;
-        private RelayCommand cellChangedCommand;
+        private RelayCommand depoCellChangedCommand;
         #endregion
         #region Properties
         public bool ClientDoSelected { get => clientDoSelected; set { clientDoSelected = value; RaisePropertyChanged(nameof(ClientDoSelected)); } }
@@ -109,17 +109,17 @@ namespace BankEF.ViewModels
         public bool TransferSumOKEnabled { get => transferSumOKEnabled; set { transferSumOKEnabled = value; RaisePropertyChanged(nameof(TransferSumOKEnabled)); } }
         public decimal TransferAmount { get => transferAmount; set { transferAmount = value; RaisePropertyChanged(nameof(TransferAmount)); } }
         #endregion
-        public ICommand SelectionChangedCommand => selectionChangedCommand ??=
+        public ICommand DepoSelectedCommand => depoSelectedCommand ??=
             new RelayCommand((e) => IsDepoSelected = (Deposit = (e as DataGrid).SelectedItem is Deposit depo ? depo : null) != null);
         public ICommand DepoCellEditEndCommand => depoCellEditEndCommand ??= new RelayCommand((e) => cellEdited = true);
-        public ICommand CellChangedCommand => cellChangedCommand ??= new RelayCommand(CellChanged);
+        public ICommand DepoCellChangedCommand => depoCellChangedCommand ??= new RelayCommand(DepoCellChanged);
         public ICommand DepoRowEditEndCommand => depoRowEditEndCommand ??= new RelayCommand(DepoRowEditEnd);
-        public ICommand RemoveDepoCommand => removeDepoCommand ??= new RelayCommand(RemoveDepo);
+        public ICommand DepoRemoveCommand => depoRemoveCommand ??= new RelayCommand(RemoveDepo);
         #region Команды перечисления средств с одного депозита на другой.
         public ICommand TransferCommand => transferCommand ??= new RelayCommand(Transfer);
         public ICommand TransfAmountChangedCommand => transfAmountChangedCommand ??= new RelayCommand(TransfAmountChanged);
         public ICommand OKTransferCommand => oKTransferCommand ??= new RelayCommand((e) => (e as TransferDialog).DialogResult = true);
-        public ICommand TargetTransferDepoSelectionChangedCommand => targetTransferDepoSelectionChangedCommand ??= new RelayCommand(SelectTargetTransferDepo);
+        public ICommand TargetDepoSelectedCommand => targetDepoSelectedCommand ??= new RelayCommand(SelectTargetDepo);
         #endregion
         #endregion
         #region Handlers
@@ -169,7 +169,7 @@ namespace BankEF.ViewModels
             Context.SaveChanges();
             (e as DataGrid).Items.Refresh();
         }
-        private void SelectTargetTransferDepo(object e)
+        private void SelectTargetDepo(object e)
         {
             if ((TargetTransferDepo = (e as ListBox).SelectedItem is Account account ? account : null) == null)
                 return;
@@ -192,7 +192,7 @@ namespace BankEF.ViewModels
                 return;
             }
         }
-        private void CellChanged(object e)
+        private void DepoCellChanged(object e)
         {
             if (!cellEdited)
                 return;

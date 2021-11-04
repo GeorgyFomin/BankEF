@@ -40,7 +40,7 @@
             </ListBox.ItemTemplate>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding TargetTransferDepoSelectionChangedCommand}" CommandParameter="{Binding ElementName=targetDepoListBox}"/>
+                    <i:InvokeCommandAction Command="{Binding TargetDepoSelectedCommand}" CommandParameter="{Binding ElementName=targetDepoListBox}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </ListBox>

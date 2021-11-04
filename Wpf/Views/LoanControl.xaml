@@ -31,7 +31,7 @@
             </DataGrid.InputBindings>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding LoanSelectionCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
+                    <i:InvokeCommandAction Command="{Binding LoanSelectedCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CellEditEnding">
                     <i:InvokeCommandAction Command="{Binding LoanCellEditEndCommand}" CommandParameter="{Binding ElementName=loanGrid}"/>

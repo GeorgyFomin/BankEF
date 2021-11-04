@@ -3,6 +3,7 @@ using BankEF.Commands;
 using BankEF.Dialogs;
 using Domain.Model;
 using Persistence.Context;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,7 +29,7 @@ namespace BankEF.ViewModels
         private bool clientDoSelected;
         #endregion
         #region Команды управления событиями
-        private RelayCommand loanSelectionCommand;
+        private RelayCommand loanSelectedCommand;
         private RelayCommand loanRemoveCommand;
         private RelayCommand loanCellEditEndCommand;
         private RelayCommand clientSelectedCommand;
@@ -47,27 +48,6 @@ namespace BankEF.ViewModels
         public object DataSource { get; set; }
         public DataContext Context { get; set; }
         /// <summary>
-        /// Возвращает список всех кредитов банка.
-        /// </summary>
-        //public ObservableCollection<Account> Loans
-        //{
-        //    get
-        //    {
-        //        ObservableCollection<Account> loans = new ObservableCollection<Account>();
-        //        foreach (Department dep in bank.Deps)
-        //        {
-        //            foreach (Client client in dep.Clients)
-        //            {
-        //                foreach (Account loan in client.Loans)
-        //                {
-        //                    loans.Add(loan);
-        //                }
-        //            }
-        //        }
-        //        return loans;
-        //    }
-        //}
-        /// <summary>
         /// Возвращает список всех клиентов банка.
         /// </summary>
         public ObservableCollection<Client> Clients => Context.Clients.Local.ToObservableCollection();
@@ -85,19 +65,14 @@ namespace BankEF.ViewModels
         public bool ClientDoSelected { get => clientDoSelected; set { clientDoSelected = value; RaisePropertyChanged(nameof(ClientDoSelected)); } }
         #endregion
         #region Команды - обработчики событий.
-        public ICommand LoanSelectionCommand => loanSelectionCommand ??= new RelayCommand((e) => Loan = (e as DataGrid).SelectedItem is Loan loan ? loan : null);
+        public ICommand LoanSelectedCommand => loanSelectedCommand ??= new RelayCommand((e) => Loan = (e as DataGrid).SelectedItem is Loan loan ? loan : null);
         public ICommand LoanRemoveCommand => loanRemoveCommand ??= new RelayCommand(RemoveLoan);
         public ICommand LoanCellEditEndCommand => loanCellEditEndCommand ??= new RelayCommand((e) => cellEdited = true);
         public ICommand LoanCellChangedCommand => loanCellChangedCommand ??= new RelayCommand(LoanCellChanged);
         public ICommand LoanRowEditEndCommand => loanRowEditEndCommand ??= new RelayCommand(LoanRowEditEnd);
         #region Команды выбора клиента вновь созданного кредита
         public ICommand ClientSelectedCommand => clientSelectedCommand ??= new RelayCommand((e) => ClientDoSelected = true);
-        public ICommand OKClientSelectionCommand => oKClientSelectionCommand ??= new RelayCommand((e) =>
-        {
-            ClientsDialog dialog = e as ClientsDialog;
-            Client = dialog.clientListBox.SelectedItem is Client client ? client : null;
-            dialog.DialogResult = true;
-        });
+        public ICommand OKClientSelectionCommand => oKClientSelectionCommand ??= new RelayCommand(SelectNewLoanClient);
         #endregion
         #endregion
         #endregion
@@ -142,6 +117,12 @@ namespace BankEF.ViewModels
             grid.CommitEdit();
             Context.SaveChanges();
             blockAccountEditEndingHandler = false;
+        }
+        private void SelectNewLoanClient(object e)
+        {
+            ClientsDialog dialog = e as ClientsDialog;
+            Client = dialog.clientListBox.SelectedItem is Client client ? client : null;
+            dialog.DialogResult = true;
         }
     }
 }

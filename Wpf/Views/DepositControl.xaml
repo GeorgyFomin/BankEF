@@ -34,11 +34,11 @@
                 EditingElementStyle="{StaticResource EditCheckboxStyle}" ElementStyle="{StaticResource ElementCheckBoxStyle}"/>
             </DataGrid.Columns>
             <DataGrid.InputBindings>
-                <KeyBinding Key="Delete" Command="{Binding RemoveDepoCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
+                <KeyBinding Key="Delete" Command="{Binding DepoRemoveCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
             </DataGrid.InputBindings>
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
+                    <i:InvokeCommandAction Command="{Binding DepoSelectedCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
                 </i:EventTrigger>
                 <i:EventTrigger EventName="CellEditEnding">
                     <i:InvokeCommandAction Command="{Binding DepoCellEditEndCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
@@ -46,9 +46,8 @@
                 <i:EventTrigger EventName="RowEditEnding">
                     <i:InvokeCommandAction Command="{Binding DepoRowEditEndCommand}" CommandParameter="{Binding ElementName=depoGrid}"/>
                 </i:EventTrigger>
-
                 <i:EventTrigger EventName="CurrentCellChanged">
-                    <i:InvokeCommandAction Command="{Binding CellChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}" />
+                    <i:InvokeCommandAction Command="{Binding DepoCellChangedCommand}" CommandParameter="{Binding ElementName=depoGrid}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DataGrid>
