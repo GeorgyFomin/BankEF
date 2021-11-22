@@ -13,7 +13,8 @@ namespace Domain.Model
         {
             get => deposits; set
             {
-                deposits = value ?? new HashSet<Deposit>(); foreach (Deposit deposit in deposits)
+                deposits = value ?? new HashSet<Deposit>(); 
+                foreach (Deposit deposit in deposits)
                 {
                     deposit.Client = this;
                 }
@@ -24,7 +25,8 @@ namespace Domain.Model
         {
             get => loans; set
             {
-                loans = value ?? new HashSet<Loan>(); foreach (Loan loan in loans)
+                loans = value ?? new HashSet<Loan>(); 
+                foreach (Loan loan in loans)
                 {
                     loan.Client = this;
                 }

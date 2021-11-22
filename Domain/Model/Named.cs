@@ -1,6 +1,8 @@
-﻿namespace Domain.Model
+﻿using CSharpFunctionalExtensions;
+
+namespace Domain.Model
 {
-    public class Named:Guided
+    public class Named : Entity<int>
     {
         private string name = "Noname";
         public string Name { get => name; set => name = !string.IsNullOrEmpty(value) && !string.IsNullOrEmpty(value.Trim()) ? value : "Noname"; }

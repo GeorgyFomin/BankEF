@@ -1,8 +1,9 @@
-﻿using System;
+﻿using CSharpFunctionalExtensions;
+using System;
 
 namespace Domain.Model
 {
-    public class Account : Guided
+    public class Account : Entity<int>
     {
         public const decimal MinSize = .01m;
         public int Number { get; private set; }

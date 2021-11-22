@@ -11,7 +11,8 @@ namespace Domain.Model
         {
             get => clients; set
             {
-                clients = value ?? new HashSet<Client>(); foreach (Client client in clients)
+                clients = value ?? new HashSet<Client>(); 
+                foreach (Client client in clients)
                 {
                     client.Department = this;
                 }
